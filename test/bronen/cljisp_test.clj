@@ -8,4 +8,5 @@
 
 (deftest parser-test
   (testing "TODO: implement parser"
-    (is (= (parser ["number"]){:name "number"}))))
+    (is (= (parser [{:token "number" :value "5"}])
+           {:token "number" :value 5}))))
