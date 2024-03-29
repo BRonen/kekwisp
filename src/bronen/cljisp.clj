@@ -33,7 +33,8 @@
   (parse-list token tokens))
 
 (def default-context
-  {"def" (fn [v] {:token "definition" :value v})})
+  {"def" (fn [v] {:token "definition" :value v})
+   "fn" (fn [v] {:token "function" :value v})})
 
 (defn eval-literal
   [{token :token value :value} ctx]
@@ -55,13 +56,22 @@
     value
     (eval-number {:token token :value value} ctx)))
 
+(declare evaluate)
+
+(defn eval-list
+  [values ctx]
+  (let [f (evaluate (first values) ctx)]
+    (if (= (:token f) "definition")
+      (swap! ctx #(conj % {(:value (get values 1))
+                           (:value (get values 2))}))
+      ;(if (= (:token f) "function")
+        ;(swap! ctx #(conj % {(:value (get values 1))
+                             ;(:value (get values 2))}))
+      (println "error: calling a non callable"))));)
+
 (defn evaluate
   "Evaluates a syntax tree"
   [{token :token value :value} ctx]
   (if (= token "list")
-    (let [f (evaluate (first value) ctx)]
-      (if (= (:token f) "definition")
-        (swap! ctx #(conj % {(:value (get value 1))
-                             (:value (get value 2))}))
-        (println "error: calling a not callable")))
+    (eval-list value ctx)
     (eval-string {:token token :value value} ctx)))
