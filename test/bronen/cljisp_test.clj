@@ -10,13 +10,23 @@
            [{:token "string" :value '(\l \o \r \e \m)}]))
     (is (= (lexer "println" [])
            [{:token "literal" :value '(\p \r \i \n \t \l \n)}]))
+    (is (= (lexer "()" [])
+           [{:token "lbraces"} {:token "rbraces"}]))
+    (is (= (lexer ")(" [])
+           [{:token "rbraces"} {:token "lbraces"}]))
     (is (= (lexer "123 \"lorem\"" [])
            [{:token "number" :value '(\1 \2 \3)}
             {:token "string" :value '(\l \o \r \e \m)}]))
     (is (= (lexer "println 123 \"lorem\"" [])
            [{:token "literal" :value '(\p \r \i \n \t \l \n)}
             {:token "number" :value '(\1 \2 \3)}
-            {:token "string" :value '(\l \o \r \e \m)}]))))
+            {:token "string" :value '(\l \o \r \e \m)}]))
+    (is (= (lexer "(println 123 \"lorem\")" [])
+           [{:token "lbraces"}
+            {:token "literal" :value '(\p \r \i \n \t \l \n)}
+            {:token "number" :value '(\1 \2 \3)}
+            {:token "string" :value '(\l \o \r \e \m)}
+            {:token "rbraces"}]))))
 
 (deftest parser-test
   (testing "Should parse syntax tokens into a valid syntax tree"

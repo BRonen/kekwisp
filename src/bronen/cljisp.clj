@@ -31,8 +31,12 @@
           (if (Character/isDigit (first chars))
             (let [[rst token] (lexer-number chars)]
               (recur rst (conj acc token)))
-            (let [[rst token] (lexer-literal chars)]
-              (recur rst (conj acc token))))))))
+            (if (= (first chars) \()
+              (recur (drop 1 chars) (conj acc {:token "lbraces"}))
+              (if (= (first chars) \))
+                (recur (drop 1 chars) (conj acc {:token "rbraces"}))
+                (let [[rst token] (lexer-literal chars)]
+                  (recur rst (conj acc token))))))))))
 
 (defn parse-literal [token _] token)
 
