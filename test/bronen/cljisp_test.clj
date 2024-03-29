@@ -3,8 +3,20 @@
             [bronen.cljisp :refer [lexer parse-expression, evaluate]]))
 
 (deftest lexer-test
-  (testing "TODO: implement lexer"
-    (is (= (lexer "") nil))))
+  (testing "Should tokenize a string into valid tokens"
+    (is (= (lexer "123" [])
+           [{:token "number" :value '(\1 \2 \3)}]))
+    (is (= (lexer "\"lorem\"" [])
+           [{:token "string" :value '(\l \o \r \e \m)}]))
+    (is (= (lexer "println" [])
+           [{:token "literal" :value '(\p \r \i \n \t \l \n)}]))
+    (is (= (lexer "123 \"lorem\"" [])
+           [{:token "number" :value '(\1 \2 \3)}
+            {:token "string" :value '(\l \o \r \e \m)}]))
+    (is (= (lexer "println 123 \"lorem\"" [])
+           [{:token "literal" :value '(\p \r \i \n \t \l \n)}
+            {:token "number" :value '(\1 \2 \3)}
+            {:token "string" :value '(\l \o \r \e \m)}]))))
 
 (deftest parser-test
   (testing "Should parse syntax tokens into a valid syntax tree"
