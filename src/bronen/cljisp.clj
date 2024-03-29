@@ -38,18 +38,20 @@
                 (let [[rst token] (lexer-literal chars)]
                   (recur rst (conj acc token))))))))))
 
-(defn parse-literal [token _] token)
+(defn parse-literal
+  [token _]
+  (conj token {:value (apply str (:value token))}))
 
 (defn parse-number
   [token tokens]
   (if (= (:token token) "number")
-    (conj token {:value (Integer/parseInt (:value token))})
+    (conj token {:value (Integer/parseInt (apply str (:value token)))})
     (parse-literal token tokens)))
 
 (defn parse-string
   [token tokens]
   (if (= (:token token) "string")
-    token
+    (conj token {:value (apply str (:value token))})
     (parse-number token tokens)))
 
 (declare parse-expression)

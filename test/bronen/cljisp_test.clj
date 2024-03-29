@@ -30,16 +30,16 @@
 
 (deftest parser-test
   (testing "Should parse syntax tokens into a valid syntax tree"
-    (is (= (parse-expression [{:token "literal" :value "println"}])
+    (is (= (parse-expression [{:token "literal" :value '(\p \r \i \n \t \l \n)}])
            {:token "literal" :value "println"}))
-    (is (= (parse-expression [{:token "number" :value "5"}])
+    (is (= (parse-expression [{:token "number" :value '(\5)}])
            {:token "number" :value 5}))
-    (is (= (parse-expression [{:token "string" :value "lorem ipsum"}])
+    (is (= (parse-expression [{:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}])
            {:token "string" :value "lorem ipsum"}))
     (is (= (parse-expression [{:token "lbraces"}
-                              {:token "literal" :value "println"}
-                              {:token "number" :value "5"}
-                              {:token "string" :value "lorem ipsum"}
+                              {:token "literal" :value '(\p \r \i \n \t \l \n)}
+                              {:token "number" :value '(\5)}
+                              {:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}
                               {:token "rbraces"}])
            {:token "list"
             :value [{:token "literal" :value "println"}
