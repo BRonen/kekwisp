@@ -2,6 +2,8 @@
 
 (defn quote? [s] (not= s \"))
 
+; Lexer
+
 (defn lexer-literal
   "Tokenize a literal that begins with a non-digit until finds whitespace and returns the rest"
   [chars]
@@ -36,6 +38,8 @@
      :else (let [[rst token] (lexer-literal chars)]
              (recur rst (conj acc token))))))
 
+; Parser
+
 (defn parse-literal
   [token _]
   (conj token {:value (apply str (:value token))}))
@@ -52,19 +56,21 @@
     (conj token {:value (apply str (:value token))})
     (parse-number token tokens)))
 
-(declare parse-expression)
+(declare parse)
 
 (defn parse-list
   [token tokens]
   (if (= (:token token) "lbraces")
     (let [elems (take-while #(not= (:token %) "rbraces") tokens)]
-      {:token "list" :value (map #(parse-expression [%]) elems)})
+      {:token "list" :value (map #(parse [%]) elems)})
     (parse-string token tokens)))
 
-(defn parse-expression
+(defn parse
   "Parses tokens to syntax tree"
   [[token & tokens]]
   (parse-list token tokens))
+
+; Evaluation
 
 (def default-context
   {"def" (fn [v] {:token "definition" :value v})

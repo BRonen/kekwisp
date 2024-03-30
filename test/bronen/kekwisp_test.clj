@@ -1,6 +1,6 @@
 (ns bronen.kekwisp-test
   (:require [clojure.test :refer [deftest testing is]]
-            [bronen.kekwisp :refer [lexer parse-expression, evaluate]]))
+            [bronen.kekwisp :refer [lexer parse evaluate]]))
 
 (deftest lexer-test
   (testing "Should tokenize a string into valid tokens"
@@ -30,17 +30,17 @@
 
 (deftest parser-test
   (testing "Should parse syntax tokens into a valid syntax tree"
-    (is (= (parse-expression [{:token "literal" :value '(\p \r \i \n \t \l \n)}])
+    (is (= (parse [{:token "literal" :value '(\p \r \i \n \t \l \n)}])
            {:token "literal" :value "println"}))
-    (is (= (parse-expression [{:token "number" :value '(\5)}])
+    (is (= (parse [{:token "number" :value '(\5)}])
            {:token "number" :value 5}))
-    (is (= (parse-expression [{:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}])
+    (is (= (parse [{:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}])
            {:token "string" :value "lorem ipsum"}))
-    (is (= (parse-expression [{:token "lbraces"}
-                              {:token "literal" :value '(\p \r \i \n \t \l \n)}
-                              {:token "number" :value '(\5)}
-                              {:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}
-                              {:token "rbraces"}])
+    (is (= (parse [{:token "lbraces"}
+                   {:token "literal" :value '(\p \r \i \n \t \l \n)}
+                   {:token "number" :value '(\5)}
+                   {:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}
+                   {:token "rbraces"}])
            {:token "list"
             :value [{:token "literal" :value "println"}
                     {:token "number" :value 5}
@@ -65,19 +65,19 @@
   (testing "Should evaluate a string and return the result"
     (is (= (-> "example"
                (lexer)
-               (parse-expression)
+               (parse)
                (#(evaluate % (atom {"example" 123}))))
            123))
     (is (= (-> "(+ 1 2 3)"
                (lexer)
-               (parse-expression)
+               (parse)
                (evaluate))
            6)))
   (testing "Should evaluate a string, return the result and mutate the context"
     (let [ctx (atom {})]
       (is (= (-> "(def wasd 123 444)"
                  (lexer)
-                 (parse-expression)
+                 (parse)
                  (#(evaluate % ctx)))
              444))
       (is (= @ctx
@@ -85,14 +85,14 @@
     ;(let [ctx (atom {})]
       ;(is (= (-> "(def wasd 123 (def ddd 444))"
                  ;(lexer)
-                 ;(parse-expression)
+                 ;(parse)
                  ;(#(evaluate % ctx)))
              ;nil))
       ;(is (= @ctx
              ;{"wasd" 123
               ;"ddd" 444})))))
 
-;(is (= (parse-expression [{:token "lbraces"}
+;(is (= (parse [{:token "lbraces"}
 ;                              {:token "string" :value "lorem ipsum"}
 ;                              {:token "lbraces"}
 ;                              {:token "lbraces"}
