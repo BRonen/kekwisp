@@ -106,10 +106,11 @@
       "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
                                             (:value (nth values 2))}))
                        (when (nth values 3 false) (evaluate (nth values 3) ctx)))
-      "sum" (do (println values) (apply + (map #(evaluate % ctx) (drop 1 values))))
+      "sum" (apply + (map #(evaluate % ctx) (drop 1 values)))
       "subtraction" (apply - (map #(evaluate % ctx) (drop 1 values)))
       "multiplication" (apply * (map #(evaluate % ctx) (drop 1 values)))
       "division" (apply / (map #(evaluate % ctx) (drop 1 values)))
+      "callable" ((:value f) (map #(evaluate % ctx) (drop 1 values)))
       "function" {:token "callable"
                   :value (fn [args]
                            (let [params (map :value (:value (nth values 1)))

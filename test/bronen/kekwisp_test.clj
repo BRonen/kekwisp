@@ -121,4 +121,12 @@
                    (#(evaluate % ctx)))]
       (is (= (:token func) "callable"))
       (is (= ((:value func) '(2 3)) 5))
-      (is (= ((:value func) '(2 5)) 7)))))
+      (is (= ((:value func) '(2 5)) 7))))
+  (testing "Should evaluate a string that defines a function and and execute immediately"
+    (let [ctx (atom {})]
+      (is (= (-> "((fn (a b) (+ a b)) 12 233)"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             245)))))
