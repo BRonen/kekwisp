@@ -26,4 +26,4 @@ jobs:
           cli: 1.11.1.1413
 
       - name: Run Tests
-        run: clj -T:build test
+        run: clojure -T:build test
