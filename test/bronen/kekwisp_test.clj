@@ -67,7 +67,12 @@
                (lexer)
                (parse-expression)
                (#(evaluate % (atom {"example" 123}))))
-           123)))
+           123))
+    (is (= (-> "(+ 1 2 3)"
+               (lexer)
+               (parse-expression)
+               (evaluate))
+           6)))
   (testing "Should evaluate a string, return the result and mutate the context"
     (let [ctx (atom {})]
       (is (= (-> "(def wasd 123 444)"

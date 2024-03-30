@@ -68,7 +68,11 @@
 
 (def default-context
   {"def" (fn [v] {:token "definition" :value v})
-   "fn" (fn [v] {:token "function" :value v})})
+   "fn" (fn [v] {:token "function" :value v})
+   "+" (fn [v] {:token "sum" :value v})
+   "-" (fn [v] {:token "subtraction" :value v})
+   "*" (fn [v] {:token "multiplication" :value v})
+   "/" (fn [v] {:token "division" :value v})})
 
 (defn eval-literal
   [{_ :token value :value} ctx]
@@ -76,10 +80,6 @@
     (if (nil? default-value)
       (get @ctx value)
       (default-value value))))
-
-(defn eval-number [{_ :token value :value} _] value)
-
-(defn eval-string [{_ :token value :value} _] value)
 
 (declare evaluate)
 
@@ -90,6 +90,10 @@
       "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
                                             (:value (nth values 2))}))
                        (when (nth values 3 false) (evaluate (nth values 3) ctx)))
+      "sum" (apply + (map #(evaluate % ctx) (drop 1 values)))
+      "subtraction" (apply - (map #(evaluate % ctx) (drop 1 values)))
+      "multiplication" (apply * (map #(evaluate % ctx) (drop 1 values)))
+      "division" (apply / (map #(evaluate % ctx) (drop 1 values))) 
       "function" (swap! ctx #(conj % {(:value (get values 1))
                                       (:value (get values 2))})))))
 
@@ -100,6 +104,6 @@
   ([{token :token value :value} ctx]
    (case token
      "list" (eval-list value ctx)
-     "string" (eval-string {:token token :value value} ctx)
-     "number" (eval-number {:token token :value value} ctx)
+     "string" value
+     "number" value
      "literal" (eval-literal {:token token :value value} ctx))))
