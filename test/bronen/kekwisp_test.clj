@@ -76,7 +76,7 @@
                  (#(evaluate % ctx)))
              444))
       (is (= @ctx
-             {"wasd" 123})))))
+             {"wasd" 124})))))
     ;(let [ctx (atom {})]
       ;(is (= (-> "(def wasd 123 (def ddd 444))"
                  ;(lexer)
