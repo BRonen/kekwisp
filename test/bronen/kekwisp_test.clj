@@ -56,12 +56,12 @@
                    {:token "rbraces"}
                    {:token "rbraces"}])
            [{:token "list"
-            :value [{:token "string" :value "lorem ipsum"}
-                    {:token "list"
-                     :value [{:token "list"
-                              :value [{:token "literal" :value "println"}
-                                      {:token "number" :value 123}]}
-                    {:token "number" :value 234}]}]} nil]))))
+             :value [{:token "string" :value "lorem ipsum"}
+                     {:token "list"
+                      :value [{:token "list"
+                               :value [{:token "literal" :value "println"}
+                                       {:token "number" :value 123}]}
+                              {:token "number" :value 234}]}]} nil]))))
 
 (deftest eval-test
   (testing "Should evaluate a syntax tree and return a value"
@@ -111,6 +111,14 @@
              nil))
       (is (= @ctx
              {"wasd" 123
-              "ddd" 444})))))
-
-
+              "ddd" 444}))))
+  (testing "Should evaluate a string that defines a function"
+    (let [ctx (atom {})
+          func (-> "(fn (a b) (+ a b))"
+                   (lexer)
+                   (parse)
+                   (first)
+                   (#(evaluate % ctx)))]
+      (is (= (:token func) "callable"))
+      (is (= ((:value func) '(2 3)) 5))
+      (is (= ((:value func) '(2 5)) 7)))))

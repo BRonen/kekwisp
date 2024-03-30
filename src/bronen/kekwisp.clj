@@ -1,14 +1,16 @@
 (ns bronen.kekwisp)
 
-(defn quote? [s] (not= s \"))
+(defn quote? [s] (and (not= s \")
+                      (not= s \))
+                      (not= s \space)))
 
 ; Lexer
 
 (defn lexer-literal
   "Tokenize a literal that begins with a non-digit until finds whitespace and returns the rest"
   [chars]
-  (let [[content rst] (split-with #(not (= % \space)) chars)]
-    [(drop 1 rst) {:token "literal" :value content}]))
+  (let [[content rst] (split-with quote? chars)]
+    [rst {:token "literal" :value content}]))
 
 (defn lexer-number
   "Tokenize a string that begins with a digit until finds non-digit and returns the rest"
@@ -64,7 +66,7 @@
     (loop [result []
            remaining tokens]
       (if (and (not= (count remaining) 0)
-               (not= (-> remaining (first) (:token)) "rbraces"))
+               (not= (-> remaining first :token) "rbraces"))
         (let [[r rr] (parse remaining)] (recur (conj result r) rr))
         (let [rest-without-rbraces (drop 1 remaining)
               rest-or-nil (if (empty? rest-without-rbraces)
@@ -104,12 +106,16 @@
       "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
                                             (:value (nth values 2))}))
                        (when (nth values 3 false) (evaluate (nth values 3) ctx)))
-      "sum" (apply + (map #(evaluate % ctx) (drop 1 values)))
+      "sum" (do (println values) (apply + (map #(evaluate % ctx) (drop 1 values))))
       "subtraction" (apply - (map #(evaluate % ctx) (drop 1 values)))
       "multiplication" (apply * (map #(evaluate % ctx) (drop 1 values)))
       "division" (apply / (map #(evaluate % ctx) (drop 1 values)))
-      "function" (swap! ctx #(conj % {(:value (get values 1))
-                                      (:value (get values 2))})))))
+      "function" {:token "callable"
+                  :value (fn [args]
+                           (let [params (map :value (:value (nth values 1)))
+                                 arg-param-map (apply assoc {} (interleave params args))]
+                             (swap! ctx #(conj % arg-param-map))
+                             (evaluate (nth values 2) ctx)))})))
 
 (defn evaluate
   "Evaluates a syntax tree"
