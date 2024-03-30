@@ -4,24 +4,24 @@
 
 (deftest lexer-test
   (testing "Should tokenize a string into valid tokens"
-    (is (= (lexer "123" [])
+    (is (= (lexer "123")
            [{:token "number" :value '(\1 \2 \3)}]))
-    (is (= (lexer "\"lorem\"" [])
+    (is (= (lexer "\"lorem\"")
            [{:token "string" :value '(\l \o \r \e \m)}]))
-    (is (= (lexer "println" [])
+    (is (= (lexer "println")
            [{:token "literal" :value '(\p \r \i \n \t \l \n)}]))
-    (is (= (lexer "()" [])
+    (is (= (lexer "()")
            [{:token "lbraces"} {:token "rbraces"}]))
-    (is (= (lexer ")(" [])
+    (is (= (lexer ")(")
            [{:token "rbraces"} {:token "lbraces"}]))
-    (is (= (lexer "123 \"lorem\"" [])
+    (is (= (lexer "123 \"lorem\"")
            [{:token "number" :value '(\1 \2 \3)}
             {:token "string" :value '(\l \o \r \e \m)}]))
-    (is (= (lexer "println 123 \"lorem\"" [])
+    (is (= (lexer "println 123 \"lorem\"")
            [{:token "literal" :value '(\p \r \i \n \t \l \n)}
             {:token "number" :value '(\1 \2 \3)}
             {:token "string" :value '(\l \o \r \e \m)}]))
-    (is (= (lexer "(println 123 \"lorem\")" [])
+    (is (= (lexer "(println 123 \"lorem\")")
            [{:token "lbraces"}
             {:token "literal" :value '(\p \r \i \n \t \l \n)}
             {:token "number" :value '(\1 \2 \3)}
@@ -60,6 +60,32 @@
                 {:token "number" :value 333}]}
        ctx)
       (is (= @ctx {"example" 123 "wasd" 333})))))
+
+(deftest integration-test
+  (testing "Should evaluate a string and return the result"
+    (is (= (-> "example"
+               (lexer)
+               (parse-expression)
+               (#(evaluate % (atom {"example" 123}))))
+           123)))
+  (testing "Should evaluate a string, return the result and mutate the context"
+    (let [ctx (atom {})]
+      (is (= (-> "(def wasd 123 444)"
+                 (lexer)
+                 (parse-expression)
+                 (#(evaluate % ctx)))
+             444))
+      (is (= @ctx
+             {"wasd" 123})))))
+    ;(let [ctx (atom {})]
+      ;(is (= (-> "(def wasd 123 (def ddd 444))"
+                 ;(lexer)
+                 ;(parse-expression)
+                 ;(#(evaluate % ctx)))
+             ;nil))
+      ;(is (= @ctx
+             ;{"wasd" 123
+              ;"ddd" 444})))))
 
 ;(is (= (parse-expression [{:token "lbraces"}
 ;                              {:token "string" :value "lorem ipsum"}

@@ -21,22 +21,24 @@
     [(drop 1 rst) {:token "string" :value content}]))
 
 (defn lexer
-  [chars acc]
-  (if (= (count chars) 0) acc
-      (if (= (first chars) \space)
-        (recur (drop 1 chars) acc)
-        (if (= (first chars) \")
-          (let [[rst token] (lexer-string chars)]
-            (recur rst (conj acc token)))
-          (if (Character/isDigit (first chars))
-            (let [[rst token] (lexer-number chars)]
-              (recur rst (conj acc token)))
-            (if (= (first chars) \()
-              (recur (drop 1 chars) (conj acc {:token "lbraces"}))
-              (if (= (first chars) \))
-                (recur (drop 1 chars) (conj acc {:token "rbraces"}))
-                (let [[rst token] (lexer-literal chars)]
-                  (recur rst (conj acc token))))))))))
+  ([chars]
+   (lexer chars []))
+  ([chars acc]
+   (if (= (count chars) 0) acc
+       (if (= (first chars) \space)
+         (recur (drop 1 chars) acc)
+         (if (= (first chars) \")
+           (let [[rst token] (lexer-string chars)]
+             (recur rst (conj acc token)))
+           (if (Character/isDigit (first chars))
+             (let [[rst token] (lexer-number chars)]
+               (recur rst (conj acc token)))
+             (if (= (first chars) \()
+               (recur (drop 1 chars) (conj acc {:token "lbraces"}))
+               (if (= (first chars) \))
+                 (recur (drop 1 chars) (conj acc {:token "rbraces"}))
+                 (let [[rst token] (lexer-literal chars)]
+                   (recur rst (conj acc token)))))))))))
 
 (defn parse-literal
   [token _]
@@ -89,16 +91,19 @@
   [values ctx]
   (let [f (evaluate (first values) ctx)]
     (case (:token f)
-      "definition" (swap! ctx #(conj % {(:value (get values 1))
-                                        (:value (get values 2))}))
+      "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
+                                            (:value (nth values 2))}))
+                       (when (nth values 3 false) (evaluate (nth values 3) ctx)))
       "function" (swap! ctx #(conj % {(:value (get values 1))
                                       (:value (get values 2))})))))
 
 (defn evaluate
   "Evaluates a syntax tree"
-  [{token :token value :value} ctx]
-  (case token
-    "list" (eval-list value ctx)
-    "string" (eval-string {:token token :value value} ctx)
-    "number" (eval-number {:token token :value value} ctx)
-    "literal" (eval-literal {:token token :value value} ctx)))
+  ([arg]
+   (evaluate arg (atom {})))
+  ([{token :token value :value} ctx]
+   (case token
+     "list" (eval-list value ctx)
+     "string" (eval-string {:token token :value value} ctx)
+     "number" (eval-number {:token token :value value} ctx)
+     "literal" (eval-literal {:token token :value value} ctx))))
