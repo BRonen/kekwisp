@@ -1,3 +1,3 @@
-# Introduction to bronen/cljisp
+# Introduction to bronen/kekwisp
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)

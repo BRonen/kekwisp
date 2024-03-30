@@ -1,4 +1,4 @@
-(ns bronen.cljisp)
+(ns bronen.kekwisp)
 
 (defn quote? [s] (not= s \"))
 

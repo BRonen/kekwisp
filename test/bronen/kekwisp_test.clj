@@ -1,6 +1,6 @@
-(ns bronen.cljisp-test
+(ns bronen.kekwisp-test
   (:require [clojure.test :refer [deftest testing is]]
-            [bronen.cljisp :refer [lexer parse-expression, evaluate]]))
+            [bronen.kekwisp :refer [lexer parse-expression, evaluate]]))
 
 (deftest lexer-test
   (testing "Should tokenize a string into valid tokens"

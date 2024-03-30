@@ -3,7 +3,7 @@
   (:require [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as dd]))
 
-(def lib 'net.clojars.bronen/cljisp)
+(def lib 'net.clojars.bronen/kekwisp)
 (def version "0.1.0-SNAPSHOT")
 #_ ; alternatively, use MAJOR.MINOR.COMMITS:
 (def version (format "1.0.%s" (b/git-count-revs nil)))
@@ -21,7 +21,7 @@
 
 (defn- pom-template [version]
   [[:description "FIXME: my new library."]
-   [:url "https://github.com/bronen/cljisp"]
+   [:url "https://github.com/bronen/kekwisp"]
    [:licenses
     [:license
      [:name "Eclipse Public License"]
@@ -30,9 +30,9 @@
     [:developer
      [:name "Bronen"]]]
    [:scm
-    [:url "https://github.com/bronen/cljisp"]
-    [:connection "scm:git:https://github.com/bronen/cljisp.git"]
-    [:developerConnection "scm:git:ssh:git@github.com:bronen/cljisp.git"]
+    [:url "https://github.com/bronen/kekwisp"]
+    [:connection "scm:git:https://github.com/bronen/kekwisp.git"]
+    [:developerConnection "scm:git:ssh:git@github.com:bronen/kekwisp.git"]
     [:tag (str "v" version)]]])
 
 (defn- jar-opts [opts]
