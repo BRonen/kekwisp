@@ -41,19 +41,19 @@
 ; Parser
 
 (defn parse-literal
-  [token _]
-  (conj token {:value (apply str (:value token))}))
+  [token tokens]
+  [(conj token {:value (apply str (:value token))}) tokens])
 
 (defn parse-number
   [token tokens]
   (if (= (:token token) "number")
-    (conj token {:value (Integer/parseInt (apply str (:value token)))})
+    [(conj token {:value (Integer/parseInt (apply str (:value token)))}) tokens]
     (parse-literal token tokens)))
 
 (defn parse-string
   [token tokens]
   (if (= (:token token) "string")
-    (conj token {:value (apply str (:value token))})
+    [(conj token {:value (apply str (:value token))}) tokens]
     (parse-number token tokens)))
 
 (declare parse)
@@ -61,8 +61,16 @@
 (defn parse-list
   [token tokens]
   (if (= (:token token) "lbraces")
-    (let [elems (take-while #(not= (:token %) "rbraces") tokens)]
-      {:token "list" :value (map #(parse [%]) elems)})
+    (loop [result []
+           remaining tokens]
+      (if (and (not= (count remaining) 0)
+               (not= (-> remaining (first) (:token)) "rbraces"))
+        (let [[r rr] (parse remaining)] (recur (conj result r) rr))
+        (let [rest-without-rbraces (drop 1 remaining)
+              rest-or-nil (if (empty? rest-without-rbraces)
+                            nil
+                            rest-without-rbraces)]
+          [{:token "list" :value result} rest-or-nil])))
     (parse-string token tokens)))
 
 (defn parse
@@ -99,7 +107,7 @@
       "sum" (apply + (map #(evaluate % ctx) (drop 1 values)))
       "subtraction" (apply - (map #(evaluate % ctx) (drop 1 values)))
       "multiplication" (apply * (map #(evaluate % ctx) (drop 1 values)))
-      "division" (apply / (map #(evaluate % ctx) (drop 1 values))) 
+      "division" (apply / (map #(evaluate % ctx) (drop 1 values)))
       "function" (swap! ctx #(conj % {(:value (get values 1))
                                       (:value (get values 2))})))))
 
