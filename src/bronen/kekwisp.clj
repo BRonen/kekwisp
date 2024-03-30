@@ -24,21 +24,17 @@
   ([chars]
    (lexer chars []))
   ([chars acc]
-   (if (= (count chars) 0) acc
-       (if (= (first chars) \space)
-         (recur (drop 1 chars) acc)
-         (if (= (first chars) \")
-           (let [[rst token] (lexer-string chars)]
-             (recur rst (conj acc token)))
-           (if (Character/isDigit (first chars))
-             (let [[rst token] (lexer-number chars)]
-               (recur rst (conj acc token)))
-             (if (= (first chars) \()
-               (recur (drop 1 chars) (conj acc {:token "lbraces"}))
-               (if (= (first chars) \))
-                 (recur (drop 1 chars) (conj acc {:token "rbraces"}))
-                 (let [[rst token] (lexer-literal chars)]
-                   (recur rst (conj acc token)))))))))))
+   (cond
+     (= (count chars) 0) acc
+     (= (first chars) \space) (recur (drop 1 chars) acc)
+     (= (first chars) \") (let [[rst token] (lexer-string chars)]
+                            (recur rst (conj acc token)))
+     (Character/isDigit (first chars)) (let [[rst token] (lexer-number chars)]
+                                         (recur rst (conj acc token)))
+     (= (first chars) \() (recur (drop 1 chars) (conj acc {:token "lbraces"}))
+     (= (first chars) \)) (recur (drop 1 chars) (conj acc {:token "rbraces"}))
+     :else (let [[rst token] (lexer-literal chars)]
+             (recur rst (conj acc token))))))
 
 (defn parse-literal
   [token _]
