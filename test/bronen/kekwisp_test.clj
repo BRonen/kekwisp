@@ -10,6 +10,10 @@
            [{:token "string" :value '(\l \o \r \e \m)}]))
     (is (= (lexer "println")
            [{:token "literal" :value '(\p \r \i \n \t \l \n)}]))
+    (is (= (lexer "true")
+           [{:token "literal" :value '(\t \r \u \e)}]))
+    (is (= (lexer "false")
+           [{:token "literal" :value '(\f \a \l \s \e)}]))
     (is (= (lexer "()")
            [{:token "lbraces"} {:token "rbraces"}]))
     (is (= (lexer ")(")
@@ -36,6 +40,10 @@
            [{:token "number" :value 5} nil]))
     (is (= (parse [{:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}])
            [{:token "string" :value "lorem ipsum"} nil]))
+    (is (= (parse [{:token "literal" :value '(\t \r \u \e)}])
+           [{:token "boolean" :value true} nil]))
+    (is (= (parse [{:token "literal" :value '(\f \a \l \s \e)}])
+           [{:token "boolean" :value false} nil]))
     (is (= (parse [{:token "lbraces"}
                    {:token "literal" :value '(\p \r \i \n \t \l \n)}
                    {:token "number" :value '(\5)}
@@ -67,7 +75,9 @@
   (testing "Should evaluate a syntax tree and return a value"
     (is (= (evaluate {:token "literal" :value "example"} (atom {"example" 123})) 123))
     (is (= (evaluate {:token "number" :value 5} (atom {})) 5))
-    (is (= (evaluate {:token "string" :value "lorem ipsum"} (atom {})) "lorem ipsum")))
+    (is (= (evaluate {:token "string" :value "lorem ipsum"} (atom {})) "lorem ipsum"))
+    (is (= (evaluate {:token "boolean" :value true} (atom {})) true))
+    (is (= (evaluate {:token "boolean" :value false} (atom {})) false)))
   (testing "Should evaluate a syntax tree and mutate the original context"
     (let [ctx (atom {"example" 123})]
       (evaluate
@@ -86,6 +96,20 @@
                (first)
                (#(evaluate % (atom {"example" 123}))))
            123))
+    (let [ctx (atom {})]
+      (is (= (-> "true"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             true)))
+    (let [ctx (atom {})]
+      (is (= (-> "false"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             false)))
     (is (= (-> "(+ 1 2 3)"
                (lexer)
                (parse)
@@ -137,4 +161,18 @@
                  (parse)
                  (first)
                  (#(evaluate % ctx)))
-             67)))))
+             67)))
+    (let [ctx (atom {})]
+      (is (= (-> "(if true 123 444)"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             123)))
+    (let [ctx (atom {})]
+      (is (= (-> "(if false 123 444)"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             444)))))

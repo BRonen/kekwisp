@@ -46,11 +46,18 @@
   [token tokens]
   [(conj token {:value (apply str (:value token))}) tokens])
 
+(defn parse-bool
+  [token tokens]
+  (case (:value token)
+    [\t \r \u \e] [{:token "boolean" :value true} tokens]
+    [\f \a \l \s \e] [{:token "boolean" :value false} tokens]
+    (parse-literal token tokens)))
+
 (defn parse-number
   [token tokens]
   (if (= (:token token) "number")
     [(conj token {:value (Integer/parseInt (apply str (:value token)))}) tokens]
-    (parse-literal token tokens)))
+    (parse-bool token tokens)))
 
 (defn parse-string
   [token tokens]
@@ -83,10 +90,11 @@
 ; Evaluation
 
 (def default-context
-  {"print" (fn [v] {:token "print" :value v}) 
+  {"print" (fn [v] {:token "print" :value v})
    "def" (fn [v] {:token "definition" :value v})
    "fn" (fn [v] {:token "function" :value v})
    "do" (fn [v] {:token "do" :value v})
+   "if" (fn [v] {:token "conditional" :value v})
    "+" (fn [v] {:token "sum" :value v})
    "-" (fn [v] {:token "subtraction" :value v})
    "*" (fn [v] {:token "multiplication" :value v})
@@ -112,6 +120,7 @@
       "division" (apply / (map #(evaluate % ctx) (drop 1 values)))
       "print" (let [result (doall (map #(evaluate % ctx) (drop 1 values)))] (println result) result)
       "do" (last (doall (map #(evaluate % ctx) (drop 1 values))))
+      "conditional" (if (evaluate (nth values 1)) (evaluate (nth values 2)) (evaluate (nth values 3)))
       "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
                                             (evaluate (nth values 2))}))
                        (when (nth values 3 false) (evaluate (nth values 3) ctx)))
@@ -131,4 +140,5 @@
      "list" (eval-list value ctx)
      "string" value
      "number" value
+     "boolean" value
      "literal" (eval-literal {:token token :value value} ctx))))
