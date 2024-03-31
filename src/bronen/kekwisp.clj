@@ -83,8 +83,10 @@
 ; Evaluation
 
 (def default-context
-  {"def" (fn [v] {:token "definition" :value v})
+  {"print" (fn [v] {:token "print" :value v}) 
+   "def" (fn [v] {:token "definition" :value v})
    "fn" (fn [v] {:token "function" :value v})
+   "do" (fn [v] {:token "do" :value v})
    "+" (fn [v] {:token "sum" :value v})
    "-" (fn [v] {:token "subtraction" :value v})
    "*" (fn [v] {:token "multiplication" :value v})
@@ -103,14 +105,16 @@
   [values ctx]
   (let [f (evaluate (first values) ctx)]
     (case (:token f)
-      "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
-                                            (:value (nth values 2))}))
-                       (when (nth values 3 false) (evaluate (nth values 3) ctx)))
+      "callable" ((:value f) (map #(evaluate % ctx) (drop 1 values)))
       "sum" (apply + (map #(evaluate % ctx) (drop 1 values)))
       "subtraction" (apply - (map #(evaluate % ctx) (drop 1 values)))
       "multiplication" (apply * (map #(evaluate % ctx) (drop 1 values)))
       "division" (apply / (map #(evaluate % ctx) (drop 1 values)))
-      "callable" ((:value f) (map #(evaluate % ctx) (drop 1 values)))
+      "print" (let [result (doall (map #(evaluate % ctx) (drop 1 values)))] (println result) result)
+      "do" (last (doall (map #(evaluate % ctx) (drop 1 values))))
+      "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
+                                            (evaluate (nth values 2))}))
+                       (when (nth values 3 false) (evaluate (nth values 3) ctx)))
       "function" {:token "callable"
                   :value (fn [args]
                            (let [params (map :value (:value (nth values 1)))

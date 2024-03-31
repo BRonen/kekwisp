@@ -129,4 +129,12 @@
                  (parse)
                  (first)
                  (#(evaluate % ctx)))
-             245)))))
+             245))))
+  (testing "Should evaluate multiple expressions"
+    (let [ctx (atom {})]
+      (is (= (-> "(do (def addtwo (fn (a b) (+ a b))) (addtwo 1 2) (addtwo 23 44))"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             67)))))
