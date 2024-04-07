@@ -1,4 +1,5 @@
-(ns bronen.kekwisp)
+(ns bronen.kekwisp
+  (:require [clojure.core.reducers :as r]))
 
 (defn quote? [s] (and (not= s \")
                       (not= s \))
@@ -90,7 +91,11 @@
 ; Evaluation
 
 (def default-context
-  {"print" (fn [v] {:token "print" :value v})
+  {"list" (fn [v] {:token "list" :value v})
+   "map" (fn [v] {:token "map" :value v})
+   "get" (fn [v] {:token "get" :value v})
+   "fold" (fn [v] {:token "fold" :value v})
+   "print" (fn [v] {:token "print" :value v})
    "def" (fn [v] {:token "definition" :value v})
    "fn" (fn [v] {:token "function" :value v})
    "do" (fn [v] {:token "do" :value v})
@@ -113,14 +118,44 @@
   [values ctx]
   (let [f (evaluate (first values) ctx)]
     (case (:token f)
-      "callable" ((:value f) (map #(evaluate % ctx) (drop 1 values)))
-      "sum" (apply + (map #(evaluate % ctx) (drop 1 values)))
-      "subtraction" (apply - (map #(evaluate % ctx) (drop 1 values)))
-      "multiplication" (apply * (map #(evaluate % ctx) (drop 1 values)))
-      "division" (apply / (map #(evaluate % ctx) (drop 1 values)))
-      "print" (let [result (doall (map #(evaluate % ctx) (drop 1 values)))] (println result) result)
-      "do" (last (doall (map #(evaluate % ctx) (drop 1 values))))
-      "conditional" (if (evaluate (nth values 1)) (evaluate (nth values 2)) (evaluate (nth values 3)))
+      "callable" ((:value f) (map #(evaluate % ctx)
+                                  (drop 1 values)))
+      "map" (let [f (-> values (nth 1) (evaluate ctx) :value)]
+              {:token "list"
+               :value (map #(f [%])
+                           (-> values (nth 2) (evaluate ctx) :value))})
+      "fold" (let [f (-> values (nth 1) (evaluate ctx) :value)]
+               (r/fold (fn
+                         ([] (-> values (nth 2) (evaluate ctx)))
+                         ([acc v] (f [acc v])))
+                       (-> values (nth 3) (evaluate ctx) :value)))
+      "get" (let [i (-> values (nth 2) (evaluate ctx))]
+              (-> values
+                  (nth 1)
+                  :value
+                  (#(drop 1 %))
+                  (nth i)
+                  (evaluate ctx)))
+      "list" {:token "list"
+              :value (map #(evaluate % ctx)
+                          (drop 1 values))}
+      "sum" (apply + (map #(evaluate % ctx)
+                          (drop 1 values)))
+      "subtraction" (apply - (map #(evaluate % ctx)
+                                  (drop 1 values)))
+      "multiplication" (apply * (map #(evaluate % ctx)
+                                     (drop 1 values)))
+      "division" (apply / (map #(evaluate % ctx)
+                               (drop 1 values)))
+      "print" (let [result (doall (map #(evaluate % ctx)
+                                       (drop 1 values)))]
+                (println result)
+                result)
+      "do" (last (doall (map #(evaluate % ctx)
+                             (drop 1 values))))
+      "conditional" (if (evaluate (nth values 1))
+                      (evaluate (nth values 2))
+                      (evaluate (nth values 3)))
       "definition" (do (swap! ctx #(conj % {(:value (nth values 1))
                                             (evaluate (nth values 2))}))
                        (when (nth values 3 false) (evaluate (nth values 3) ctx)))
