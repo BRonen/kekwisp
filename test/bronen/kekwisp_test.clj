@@ -5,86 +5,86 @@
 (deftest lexer-test
   (testing "Should tokenize a string into valid tokens"
     (is (= (lexer "123")
-           [{:token "number" :value '(\1 \2 \3)}]))
+           [{:token :number :value '(\1 \2 \3)}]))
     (is (= (lexer "\"lorem\"")
-           [{:token "string" :value '(\l \o \r \e \m)}]))
+           [{:token :string :value '(\l \o \r \e \m)}]))
     (is (= (lexer "println")
-           [{:token "literal" :value '(\p \r \i \n \t \l \n)}]))
+           [{:token :literal :value '(\p \r \i \n \t \l \n)}]))
     (is (= (lexer "true")
-           [{:token "literal" :value '(\t \r \u \e)}]))
+           [{:token :literal :value '(\t \r \u \e)}]))
     (is (= (lexer "false")
-           [{:token "literal" :value '(\f \a \l \s \e)}]))
+           [{:token :literal :value '(\f \a \l \s \e)}]))
     (is (= (lexer "()")
-           [{:token "lbraces"} {:token "rbraces"}]))
+           [{:token :lbraces} {:token :rbraces}]))
     (is (= (lexer ")(")
-           [{:token "rbraces"} {:token "lbraces"}]))
+           [{:token :rbraces} {:token :lbraces}]))
     (is (= (lexer "123 \"lorem\"")
-           [{:token "number" :value '(\1 \2 \3)}
-            {:token "string" :value '(\l \o \r \e \m)}]))
+           [{:token :number :value '(\1 \2 \3)}
+            {:token :string :value '(\l \o \r \e \m)}]))
     (is (= (lexer "println 123 \"lorem\"")
-           [{:token "literal" :value '(\p \r \i \n \t \l \n)}
-            {:token "number" :value '(\1 \2 \3)}
-            {:token "string" :value '(\l \o \r \e \m)}]))
+           [{:token :literal :value '(\p \r \i \n \t \l \n)}
+            {:token :number :value '(\1 \2 \3)}
+            {:token :string :value '(\l \o \r \e \m)}]))
     (is (= (lexer "(println 123 \"lorem\")")
-           [{:token "lbraces"}
-            {:token "literal" :value '(\p \r \i \n \t \l \n)}
-            {:token "number" :value '(\1 \2 \3)}
-            {:token "string" :value '(\l \o \r \e \m)}
-            {:token "rbraces"}]))))
+           [{:token :lbraces}
+            {:token :literal :value '(\p \r \i \n \t \l \n)}
+            {:token :number :value '(\1 \2 \3)}
+            {:token :string :value '(\l \o \r \e \m)}
+            {:token :rbraces}]))))
 
 (deftest parser-test
   (testing "Should parse syntax tokens into a valid syntax tree"
-    (is (= (parse [{:token "literal" :value '(\p \r \i \n \t \l \n)}])
-           [{:token "literal" :value "println"} nil]))
-    (is (= (parse [{:token "number" :value '(\5)}])
-           [{:token "number" :value 5} nil]))
-    (is (= (parse [{:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}])
-           [{:token "string" :value "lorem ipsum"} nil]))
-    (is (= (parse [{:token "literal" :value '(\t \r \u \e)}])
-           [{:token "boolean" :value true} nil]))
-    (is (= (parse [{:token "literal" :value '(\f \a \l \s \e)}])
-           [{:token "boolean" :value false} nil]))
-    (is (= (parse [{:token "lbraces"}
-                   {:token "literal" :value '(\p \r \i \n \t \l \n)}
-                   {:token "number" :value '(\5)}
-                   {:token "string" :value '(\l \o \r \e \m \space \i \p \s \u \m)}
-                   {:token "rbraces"}])
-           [{:token "list"
-             :value [{:token "literal" :value "println"}
-                     {:token "number" :value 5}
-                     {:token "string" :value "lorem ipsum"}]} nil]))
-    (is (= (parse [{:token "lbraces"}
-                   {:token "string" :value "lorem ipsum"}
-                   {:token "lbraces"}
-                   {:token "lbraces"}
-                   {:token "literal" :value "println"}
-                   {:token "number" :value "123"}
-                   {:token "rbraces"}
-                   {:token "number" :value "234"}
-                   {:token "rbraces"}
-                   {:token "rbraces"}])
-           [{:token "list"
-             :value [{:token "string" :value "lorem ipsum"}
-                     {:token "list"
-                      :value [{:token "list"
-                               :value [{:token "literal" :value "println"}
-                                       {:token "number" :value 123}]}
-                              {:token "number" :value 234}]}]} nil]))))
+    (is (= (parse [{:token :literal :value '(\p \r \i \n \t \l \n)}])
+           [{:node :literal :value "println"} nil]))
+    (is (= (parse [{:token :number :value '(\5)}])
+           [{:node :number :value 5} nil]))
+    (is (= (parse [{:token :string :value '(\l \o \r \e \m \space \i \p \s \u \m)}])
+           [{:node :string :value "lorem ipsum"} nil]))
+    (is (= (parse [{:token :literal :value '(\t \r \u \e)}])
+           [{:node :boolean :value true} nil]))
+    (is (= (parse [{:token :literal :value '(\f \a \l \s \e)}])
+           [{:node :boolean :value false} nil]))
+    (is (= (parse [{:token :lbraces}
+                   {:token :literal :value '(\p \r \i \n \t \l \n)}
+                   {:token :number :value '(\5)}
+                   {:token :string :value '(\l \o \r \e \m \space \i \p \s \u \m)}
+                   {:token :rbraces}])
+           [{:node :list
+             :value [{:node :literal :value "println"}
+                     {:node :number :value 5}
+                     {:node :string :value "lorem ipsum"}]} nil]))
+    (is (= (parse [{:token :lbraces}
+                   {:token :string :value "lorem ipsum"}
+                   {:token :lbraces}
+                   {:token :lbraces}
+                   {:token :literal :value "println"}
+                   {:token :number :value "123"}
+                   {:token :rbraces}
+                   {:token :number :value "234"}
+                   {:token :rbraces}
+                   {:token :rbraces}])
+           [{:node :list
+             :value [{:node :string :value "lorem ipsum"}
+                     {:node :list
+                      :value [{:node :list
+                               :value [{:node :literal :value "println"}
+                                       {:node :number :value 123}]}
+                              {:node :number :value 234}]}]} nil]))))
 
 (deftest eval-test
   (testing "Should evaluate a syntax tree and return a value"
-    (is (= (evaluate {:token "literal" :value "example"} (atom {"example" 123})) 123))
-    (is (= (evaluate {:token "number" :value 5} (atom {})) 5))
-    (is (= (evaluate {:token "string" :value "lorem ipsum"} (atom {})) "lorem ipsum"))
-    (is (= (evaluate {:token "boolean" :value true} (atom {})) true))
-    (is (= (evaluate {:token "boolean" :value false} (atom {})) false)))
+    (is (= (evaluate {:node :literal :value "example"} (atom {"example" 123})) 123))
+    (is (= (evaluate {:node :number :value 5} (atom {})) 5))
+    (is (= (evaluate {:node :string :value "lorem ipsum"} (atom {})) "lorem ipsum"))
+    (is (= (evaluate {:node :boolean :value true} (atom {})) true))
+    (is (= (evaluate {:node :boolean :value false} (atom {})) false)))
   (testing "Should evaluate a syntax tree and mutate the original context"
     (let [ctx (atom {"example" 123})]
       (evaluate
-       {:token "list"
-        :value [{:token "literal" :value "def"}
-                {:token "literal" :value "wasd"}
-                {:token "number" :value 333}]}
+       {:node :list
+        :value [{:node :literal :value "def"}
+                {:node :literal :value "wasd"}
+                {:node :number :value 333}]}
        ctx)
       (is (= @ctx {"example" 123 "wasd" 333})))))
 
@@ -143,7 +143,7 @@
                    (parse)
                    (first)
                    (#(evaluate % ctx)))]
-      (is (= (:token func) "callable"))
+      (is (= (:node func) :callable))
       (is (= ((:value func) '(2 3)) 5))
       (is (= ((:value func) '(2 5)) 7))))
   (testing "Should evaluate a string that defines a function and and execute immediately"
@@ -183,14 +183,14 @@
                  (parse)
                  (first)
                  (#(evaluate % ctx)))
-             {:token "list" :value [1 2 3]})))
+             {:node :list :value [1 2 3]})))
     (let [ctx (atom {})]
       (is (= (-> "(list (list 1 2 3) 4 5 6)"
                  (lexer)
                  (parse)
                  (first)
                  (#(evaluate % ctx)))
-             {:token "list" :value [{:token "list" :value [1 2 3]} 4 5 6]})))
+             {:node :list :value [{:node :list :value [1 2 3]} 4 5 6]})))
     (testing "Should evaluate lists calls"
       (let [ctx (atom {})]
         (is (= (-> "(list 1 2 3)"
@@ -198,14 +198,14 @@
                    (parse)
                    (first)
                    (#(evaluate % ctx)))
-               {:token "list" :value [1 2 3]})))
+               {:node :list :value [1 2 3]})))
       (let [ctx (atom {})]
         (is (= (-> "(list (list 1 2 3) 4 5 6)"
                    (lexer)
                    (parse)
                    (first)
                    (#(evaluate % ctx)))
-               {:token "list" :value [{:token "list" :value [1 2 3]} 4 5 6]}))))
+               {:node :list :value [{:node :list :value [1 2 3]} 4 5 6]}))))
     (testing "Should evaluate map calls"
       (let [ctx (atom {})]
         (is (= (-> "(map (fn (a) 8) (list 1 2 3))"
@@ -213,13 +213,13 @@
                    (parse)
                    (first)
                    (#(evaluate % ctx)))
-               {:token "list" :value [8 8 8]}))
+               {:node :list :value [8 8 8]}))
         (is (= (-> "(map (fn (a) (* a 2)) (list 1 2 3))"
                    (lexer)
                    (parse)
                    (first)
                    (#(evaluate % ctx)))
-               {:token "list" :value [2 4 6]}))))
+               {:node :list :value [2 4 6]}))))
     (testing "Should evaluate fold calls"
       (let [ctx (atom {})]
         (is (= (-> "(fold (fn (acc v) (+ acc v)) 0 (list 1 2 3))"
