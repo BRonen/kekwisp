@@ -190,56 +190,56 @@
                  (parse)
                  (first)
                  (#(evaluate % ctx)))
-             {:node :list :value [{:node :list :value [1 2 3]} 4 5 6]})))
-    (testing "Should evaluate lists calls"
-      (let [ctx (atom {})]
-        (is (= (-> "(list 1 2 3)"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               {:node :list :value [1 2 3]})))
-      (let [ctx (atom {})]
-        (is (= (-> "(list (list 1 2 3) 4 5 6)"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               {:node :list :value [{:node :list :value [1 2 3]} 4 5 6]}))))
-    (testing "Should evaluate map calls"
-      (let [ctx (atom {})]
-        (is (= (-> "(map (fn (a) 8) (list 1 2 3))"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               {:node :list :value [8 8 8]}))
-        (is (= (-> "(map (fn (a) (* a 2)) (list 1 2 3))"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               {:node :list :value [2 4 6]}))))
-    (testing "Should evaluate fold calls"
-      (let [ctx (atom {})]
-        (is (= (-> "(fold (fn (acc v) (+ acc v)) 0 (list 1 2 3))"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               6)))
-      (let [ctx (atom {})]
-        (is (= (-> "(fold (fn (acc v) (+ acc v)) 0 (map (fn (v) (* v 2)) (list 1 2 3)))"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               12))))
-    (testing "Should evaluate get calls"
-      (let [ctx (atom {})]
-        (is (= (-> "(get (list 1 2 3) 2)"
-                   (lexer)
-                   (parse)
-                   (first)
-                   (#(evaluate % ctx)))
-               3))))))
+             {:node :list :value [{:node :list :value [1 2 3]} 4 5 6]}))))
+  (testing "Should evaluate lists calls"
+    (let [ctx (atom {})]
+      (is (= (-> "(list 1 2 3)"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             {:node :list :value [1 2 3]})))
+    (let [ctx (atom {})]
+      (is (= (-> "(list (list 1 2 3) 4 5 6)"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             {:node :list :value [{:node :list :value [1 2 3]} 4 5 6]}))))
+  (testing "Should evaluate map calls"
+    (let [ctx (atom {})]
+      (is (= (-> "(map (fn (a) 8) (list 1 2 3))"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             {:node :list :value [8 8 8]}))
+      (is (= (-> "(map (fn (a) (* a 2)) (list 1 2 3))"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             {:node :list :value [2 4 6]}))))
+  (testing "Should evaluate fold calls"
+    (let [ctx (atom {})]
+      (is (= (-> "(fold (fn (acc v) (+ acc v)) 0 (list 1 2 3))"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             6)))
+    (let [ctx (atom {})]
+      (is (= (-> "(fold (fn (acc v) (+ acc v)) 0 (map (fn (v) (* v 2)) (list 1 2 3)))"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             12))))
+  (testing "Should evaluate get calls"
+    (let [ctx (atom {})]
+      (is (= (-> "(get (list 1 2 3) 2)"
+                 (lexer)
+                 (parse)
+                 (first)
+                 (#(evaluate % ctx)))
+             3)))))

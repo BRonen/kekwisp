@@ -96,26 +96,26 @@
 
 (def default-context
   "A default map to look for default values"
-  {"list" {:node :list}
-   "map" {:node :map}
-   "get" {:node :get}
-   "fold" {:node :fold}
-   "print" {:node :print}
-   "def" {:node :definition}
-   "fn" {:node :function}
-   "do" {:node :do}
-   "if" {:node :conditional}
-   "+" {:node :sum}
-   "-" {:node :subtraction}
-   "*" {:node :multiplication}
-   "/" {:node :division}})
+  {"list" :list
+   "map" :map
+   "get" :get
+   "fold" :fold
+   "print" :print
+   "def" :definition
+   "fn" :function
+   "do" :do
+   "if" :conditional
+   "+" :sum
+   "-" :subtraction
+   "*" :multiplication
+   "/" :division})
 
 (defn eval-literal
   [{_ :node value :value} ctx]
   (let [default-value (get default-context value)]
     (if (nil? default-value)
       (get @ctx value)
-      default-value)))
+      {:node default-value})))
 
 (declare evaluate)
 
